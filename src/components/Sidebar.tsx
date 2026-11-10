@@ -12,6 +12,9 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  Settings,
+  Activity,
+  Bot,
 } from 'lucide-react';
 
 export type NavItem =
@@ -22,7 +25,10 @@ export type NavItem =
   | 'workforce'
   | 'reports'
   | 'operations'
-  | 'knowledge_base';
+  | 'knowledge_base'
+  | 'monitoring'
+  | 'ai_portal'
+  | 'settings';
 
 interface SidebarProps {
   activeNav: NavItem;
@@ -292,6 +298,81 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`h-4 w-4 shrink-0 ${activeNav === 'knowledge_base' ? 'text-red-600' : 'text-slate-500'}`}
             />
             {!isCollapsed && <span>ฐานความรู้ไอที</span>}
+          </button>
+
+          {/* การเฝ้าระวัง & API Health Check */}
+          <button
+            type="button"
+            onClick={() => handleNavSelect('monitoring')}
+            className={`relative flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left transition-colors ${
+              activeNav === 'monitoring'
+                ? 'bg-red-50 text-red-700 font-bold'
+                : 'text-slate-700 hover:bg-slate-100/80'
+            } ${isCollapsed ? 'justify-center' : ''}`}
+            title="เฝ้าระวัง & ตรวจสอบ API (Noti Monitoring & API Health Check)"
+          >
+            {activeNav === 'monitoring' && (
+              <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-md bg-red-600" />
+            )}
+            <div className="flex items-center gap-2.5 truncate">
+              <Activity
+                className={`h-4 w-4 shrink-0 ${activeNav === 'monitoring' ? 'text-red-600' : 'text-slate-500'}`}
+              />
+              {!isCollapsed && <span className="truncate">เฝ้าระวัง & API Health</span>}
+            </div>
+            {!isCollapsed && (
+              <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-800">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
+                1 แจ้งเตือน
+              </span>
+            )}
+          </button>
+
+          {/* ศูนย์บริการ AI (AI Request & Portal) */}
+          <button
+            type="button"
+            onClick={() => handleNavSelect('ai_portal')}
+            className={`relative flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left transition-colors ${
+              activeNav === 'ai_portal'
+                ? 'bg-red-50 text-red-700 font-bold'
+                : 'text-slate-700 hover:bg-slate-100/80'
+            } ${isCollapsed ? 'justify-center' : ''}`}
+            title="ศูนย์บริการ AI (AI Request & AI Portal)"
+          >
+            {activeNav === 'ai_portal' && (
+              <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-md bg-red-600" />
+            )}
+            <div className="flex items-center gap-2.5 truncate">
+              <Bot
+                className={`h-4 w-4 shrink-0 ${activeNav === 'ai_portal' ? 'text-red-600' : 'text-slate-500'}`}
+              />
+              {!isCollapsed && <span className="truncate">ศูนย์บริการ AI (AI Portal)</span>}
+            </div>
+            {!isCollapsed && (
+              <span className="ml-1 rounded-sm bg-red-600 px-1.5 py-0.5 text-[9px] font-extrabold tracking-wider text-white">
+                AI
+              </span>
+            )}
+          </button>
+
+          {/* ตั้งค่าระบบ (Settings) */}
+          <button
+            type="button"
+            onClick={() => handleNavSelect('settings')}
+            className={`relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left transition-colors ${
+              activeNav === 'settings'
+                ? 'bg-red-50 text-red-700 font-bold'
+                : 'text-slate-700 hover:bg-slate-100/80'
+            } ${isCollapsed ? 'justify-center' : ''}`}
+            title="ตั้งค่าระบบ (Settings)"
+          >
+            {activeNav === 'settings' && (
+              <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-md bg-red-600" />
+            )}
+            <Settings
+              className={`h-4 w-4 shrink-0 ${activeNav === 'settings' ? 'text-red-600' : 'text-slate-500'}`}
+            />
+            {!isCollapsed && <span>ตั้งค่าระบบ</span>}
           </button>
 
 

@@ -1,4 +1,4 @@
-import { Agent, Ticket, KnowledgeArticle } from '../types/itsm.ts';
+import { Agent, Ticket, KnowledgeArticle, RequestTypeDefinition } from '../types/itsm.ts';
 
 export const SEED_AGENTS: Agent[] = [
   {
@@ -53,7 +53,7 @@ export const SEED_AGENTS: Agent[] = [
   },
 ];
 
-export const REQUEST_TYPE_DEFINITIONS = [
+export const REQUEST_TYPE_DEFINITIONS: RequestTypeDefinition[] = [
   // Service requests
   { category: 'service_request', name: 'ขอความช่วยเหลือด้านไอที (Get IT help)', icon: 'HelpCircle', description: 'บริการช่วยเหลือไอทีทั่วไป ตั้งค่าอุปกรณ์ และโปรแกรมสำนักงาน', defaultPriority: 'P3 - ปานกลาง', defaultSlaHours: 8 },
   { category: 'service_request', name: 'แก้ไขปัญหาบัญชีผู้ใช้ / รหัสผ่าน (Fix an account problem)', icon: 'UserX', description: 'ปลดล็อกบัญชี โดนล็อกรหัสผ่าน หรือปัญหา 2FA / SSO', defaultPriority: 'P2 - สูง', defaultSlaHours: 4 },
@@ -527,5 +527,189 @@ export const KNOWLEDGE_ARTICLES: KnowledgeArticle[] = [
     views: 650,
     helpfulCount: 142,
     updatedAt: 'ล่าสุด',
+  },
+];
+
+export const DEFAULT_SLA_POLICIES = [
+  {
+    priority: 'P1 - วิกฤต' as const,
+    responseTimeMinutes: 15,
+    resolutionTimeHours: 2,
+    escalationHours: 1,
+    description: 'ระบบหลักหยุดทำงาน กระทบผู้ใช้ทั้งองค์กร หรือข้อมูลรั่วไหลรุนแรง',
+  },
+  {
+    priority: 'P2 - สูง' as const,
+    responseTimeMinutes: 30,
+    resolutionTimeHours: 8,
+    escalationHours: 4,
+    description: 'ระบบสำคัญทำงานผิดพลาด กระทบแผนกสำคัญหรือฝ่ายบริหาร ไม่มีวิธีแก้ไขชั่วคราว',
+  },
+  {
+    priority: 'P3 - ปานกลาง' as const,
+    responseTimeMinutes: 60,
+    resolutionTimeHours: 24,
+    escalationHours: 12,
+    description: 'คำขอบริการไอทีทั่วไป บัญชีผู้ใช้ สิทธิ์ซอฟต์แวร์ หรือปัญหาที่มีวิธีแก้ไขชั่วคราว',
+  },
+  {
+    priority: 'P4 - ต่ำ' as const,
+    responseTimeMinutes: 120,
+    resolutionTimeHours: 72,
+    escalationHours: 36,
+    description: 'คำขอข้อมูล คำปรึกษา หรือการเบิกอุปกรณ์ล่วงหน้าที่ไม่มีผลกระทบต่อการทำงานด่วน',
+  },
+];
+
+export const DEFAULT_SYSTEM_CONFIG = {
+  orgName: 'ฝ่ายสนับสนุนไอทีองค์กร (Enterprise ITSM)',
+  helpdeskEmail: 'helpdesk@enterprise.co.th',
+  operatingHours: 'จันทร์ - ศุกร์ 08:30 - 17:30 น. (สำหรับ P1 วิกฤต ดูแล 24/7)',
+  opsgenieApiKey: 'ops-prod-9941a8-live',
+  opsgenieEnabled: true,
+  slackChannel: '#it-service-desk-alerts',
+  slackEnabled: true,
+  autoAssignEnabled: true,
+};
+
+export const DEFAULT_HEALTH_SERVICES: import('../types/itsm.ts').HealthCheckService[] = [
+  {
+    id: 'svc-1',
+    name: 'Core API Gateway',
+    serviceKey: 'API-GW-01',
+    endpoint: 'https://api-gw.enterprise.corp/healthz',
+    category: 'gateway',
+    status: 'operational',
+    statusCode: 200,
+    latencyMs: 38,
+    uptimePercentage: 99.99,
+    lastChecked: 'เมื่อสักครู่',
+    message: 'ทำงานปกติ (Healthy) - อัตรา Throughput 1,420 req/s',
+    region: 'ap-southeast-1 (สิงคโปร์)',
+  },
+  {
+    id: 'svc-2',
+    name: 'Okta SSO & IAM Service',
+    serviceKey: 'IAM-OKTA',
+    endpoint: 'https://id.enterprise.corp/.well-known/health',
+    category: 'identity',
+    status: 'operational',
+    statusCode: 200,
+    latencyMs: 114,
+    uptimePercentage: 99.95,
+    lastChecked: 'เมื่อสักครู่',
+    message: 'การตรวจสอบสิทธิ์และ MFA เซสชันทำงานได้เสถียร',
+    region: 'Global / US-East',
+  },
+  {
+    id: 'svc-3',
+    name: 'Production PostgreSQL Cluster',
+    serviceKey: 'DB-PG-PROD',
+    endpoint: 'db-cluster-primary.corp.internal:5432',
+    category: 'database',
+    status: 'operational',
+    statusCode: 200,
+    latencyMs: 16,
+    uptimePercentage: 100,
+    lastChecked: 'เมื่อสักครู่',
+    message: 'Primary Leader + 2 Read Replicas ทำงานสมบูรณ์ Replication Lag < 2ms',
+    region: 'ap-southeast-1 (สิงคโปร์)',
+  },
+  {
+    id: 'svc-4',
+    name: 'Bangkok Office VPN Gateway Node 2',
+    serviceKey: 'VPN-BKK-02',
+    endpoint: 'ap-bkk-vpn-gw02.corp.internal:4501/health',
+    category: 'network',
+    status: 'degraded',
+    statusCode: 504,
+    latencyMs: 2180,
+    uptimePercentage: 94.20,
+    lastChecked: '1 นาทีที่แล้ว',
+    message: 'สัญญาณแพ็กเก็ตขาดหาย > 35% ผู้ใช้ทำงานล่าช้า (เปิดเคส SUP-101 กำลังแก้ไข)',
+    region: 'ap-southeast-1 (กรุงเทพฯ)',
+  },
+  {
+    id: 'svc-5',
+    name: 'Cloud Storage & CDN Bucket',
+    serviceKey: 'STORAGE-GCS',
+    endpoint: 'https://storage.googleapis.com/assets-corp/health',
+    category: 'storage',
+    status: 'operational',
+    statusCode: 200,
+    latencyMs: 52,
+    uptimePercentage: 99.99,
+    lastChecked: 'เมื่อสักครู่',
+    message: 'การอัปโหลดและดาวน์โหลดไฟล์มีเดียเป็นปกติ ความจุใช้งาน 42.8 TB',
+    region: 'asia-southeast1',
+  },
+  {
+    id: 'svc-6',
+    name: 'Webhook & Noti Dispatcher (Opsgenie / Slack)',
+    serviceKey: 'NOTI-DISPATCH',
+    endpoint: 'https://hooks.opsgenie.corp/v1/alert/health',
+    category: 'webhook',
+    status: 'operational',
+    statusCode: 200,
+    latencyMs: 84,
+    uptimePercentage: 99.98,
+    lastChecked: 'เมื่อสักครู่',
+    message: 'ส่งการแจ้งเตือนสายด่วน On-Call และช่องทาง Slack สำเร็จครบ 100%',
+    region: 'Cloud Function / Serverless',
+  },
+];
+
+export const INITIAL_MONITORING_ALERTS: import('../types/itsm.ts').MonitoringAlert[] = [
+  {
+    id: 'alt-1',
+    timestamp: '2 นาทีที่แล้ว',
+    serviceId: 'svc-4',
+    serviceName: 'Bangkok Office VPN Gateway Node 2',
+    severity: 'critical',
+    message: 'PacketLossExceeded: ค่าการสูญเสียแพ็กเก็ตแตะ 38% เกินเกณฑ์แจ้งเตือน 10% ต่อเนื่อง 15 นาที',
+    source: 'Prometheus',
+    acknowledged: false,
+    incidentKey: 'SUP-101',
+  },
+  {
+    id: 'alt-2',
+    timestamp: '18 นาทีที่แล้ว',
+    serviceId: 'svc-3',
+    serviceName: 'Production PostgreSQL Cluster',
+    severity: 'warning',
+    message: 'ConnectionPoolHigh: การใช้งาน Pool Connection แตะ 84% (420/500 connections)',
+    source: 'Datadog',
+    acknowledged: true,
+  },
+  {
+    id: 'alt-3',
+    timestamp: '42 นาทีที่แล้ว',
+    serviceId: 'svc-1',
+    serviceName: 'Core API Gateway',
+    severity: 'warning',
+    message: 'HighLatencySpike: ความหน่วงเฉลี่ยพุ่งแตะ 480ms ในช่วง Peak Batch Run ก่อนกลับสู่ระดับปกติ',
+    source: 'CloudWatch',
+    acknowledged: true,
+  },
+  {
+    id: 'alt-4',
+    timestamp: '1 ชั่วโมงที่แล้ว',
+    serviceId: 'svc-6',
+    serviceName: 'Webhook & Noti Dispatcher',
+    severity: 'info',
+    message: 'EscalationDispatched: ส่งการแจ้งเตือน Opsgenie ถึงวิศวกร On-call สมชาย ประเสริฐ เรียบร้อย',
+    source: 'Opsgenie',
+    acknowledged: true,
+    incidentKey: 'SUP-101',
+  },
+  {
+    id: 'alt-5',
+    timestamp: '3 ชั่วโมงที่แล้ว',
+    serviceId: 'svc-5',
+    serviceName: 'Cloud Storage & CDN Bucket',
+    severity: 'info',
+    message: 'BackupSnapshotCompleted: สำรองข้อมูลสแนปช็อตประจำวัน 14.2 GB เสร็จสิ้นสมบูรณ์',
+    source: 'CloudWatch',
+    acknowledged: true,
   },
 ];

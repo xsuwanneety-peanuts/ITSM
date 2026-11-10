@@ -7,8 +7,10 @@ import {
   calculateAgentWorkloads,
   calculateChangeRiskScore,
   formatSlaCountdown,
+  calculateHealthSummary,
+  classifyIssueRuleBased,
 } from './itsmLogic.ts';
-import { Ticket, Agent, FilterState } from '../types/itsm.ts';
+import { Ticket, Agent, FilterState, HealthCheckService } from '../types/itsm.ts';
 
 const mockAgent: Agent = {
   id: 'agt-1',
@@ -168,4 +170,60 @@ test('formatSlaCountdown displays remaining time and breached status in Thai', (
   assert.equal(remaining.isBreached, false);
   assert.equal(remaining.isWarning, false);
   assert.equal(remaining.label, 'เหลือ 1 ชม. 15 นาที');
+});
+
+test('calculateHealthSummary computes service health metrics and uptime correctly', () => {
+  const sampleServices: HealthCheckService[] = [
+    {
+      id: 's1',
+      name: 'API Gateway',
+      serviceKey: 'API-1',
+      endpoint: '/healthz',
+      category: 'gateway',
+      status: 'operational',
+      statusCode: 200,
+      latencyMs: 30,
+      uptimePercentage: 100,
+      lastChecked: 'now',
+      message: 'OK',
+      region: 'apac',
+    },
+    {
+      id: 's2',
+      name: 'VPN Node',
+      serviceKey: 'VPN-2',
+      endpoint: '/vpn',
+      category: 'network',
+      status: 'degraded',
+      statusCode: 504,
+      latencyMs: 1500,
+      uptimePercentage: 90,
+      lastChecked: 'now',
+      message: 'Degraded',
+      region: 'bkk',
+    },
+  ];
+
+  const summary = calculateHealthSummary(sampleServices);
+  assert.equal(summary.total, 2);
+  assert.equal(summary.operational, 1);
+  assert.equal(summary.degraded, 1);
+  assert.equal(summary.avgLatency, 765);
+  assert.equal(summary.overallUptime, 95);
+  assert.equal(summary.isAllHealthy, false);
+});
+
+test('classifyIssueRuleBased correctly triages VPN and Admin access keywords in Thai', () => {
+  const vpnTriage = classifyIssueRuleBased('VPN สำนักงานใหญ่หลุดบ่อยมาก SSH ไม่ได้');
+  assert.equal(vpnTriage.category, 'incident');
+  assert.equal(vpnTriage.priority, 'P2 - สูง');
+  assert.equal(vpnTriage.confidence >= 0.95, true);
+
+  const adminTriage = classifyIssueRuleBased('ขอสิทธิ์ผู้ดูแลระบบ AWS Production ชั่วคราว');
+  assert.equal(adminTriage.category, 'service_request');
+  assert.equal(adminTriage.priority, 'P2 - สูง');
+
+  const passwordTriage = classifyIssueRuleBased('ลืมรหัสผ่าน Okta 2FA เข้าเครื่องไม่ได้');
+  assert.equal(passwordTriage.category, 'service_request');
+  assert.equal(passwordTriage.priority, 'P3 - ปานกลาง');
 });

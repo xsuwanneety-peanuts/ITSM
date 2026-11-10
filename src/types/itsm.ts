@@ -130,3 +130,79 @@ export interface KnowledgeArticle {
   helpfulCount: number;
   updatedAt: string;
 }
+
+export interface RequestTypeDefinition {
+  id?: string;
+  category: TicketCategory;
+  name: string;
+  icon: string;
+  description: string;
+  defaultPriority: Priority;
+  defaultSlaHours: number;
+  enabled?: boolean;
+  department?: string;
+}
+
+export interface SlaPolicy {
+  priority: Priority;
+  responseTimeMinutes: number;
+  resolutionTimeHours: number;
+  escalationHours: number;
+  description: string;
+}
+
+export interface SystemConfig {
+  orgName: string;
+  helpdeskEmail: string;
+  operatingHours: string;
+  opsgenieApiKey: string;
+  opsgenieEnabled: boolean;
+  slackChannel: string;
+  slackEnabled: boolean;
+  autoAssignEnabled: boolean;
+}
+
+export type HealthStatus = 'operational' | 'degraded' | 'outage';
+
+export interface HealthCheckService {
+  id: string;
+  name: string;
+  serviceKey: string;
+  endpoint: string;
+  category: 'gateway' | 'identity' | 'database' | 'network' | 'storage' | 'webhook';
+  status: HealthStatus;
+  statusCode: number;
+  latencyMs: number;
+  uptimePercentage: number;
+  lastChecked: string;
+  message: string;
+  region: string;
+}
+
+export type AlertSeverity = 'critical' | 'warning' | 'info';
+
+export interface MonitoringAlert {
+  id: string;
+  timestamp: string;
+  serviceId: string;
+  serviceName: string;
+  severity: AlertSeverity;
+  message: string;
+  source: 'Prometheus' | 'Datadog' | 'Opsgenie' | 'CloudWatch' | 'HealthCheck';
+  acknowledged: boolean;
+  incidentKey?: string;
+}
+
+export interface AiTriageResult {
+  category: TicketCategory;
+  requestType: string;
+  priority: Priority;
+  urgency: Urgency;
+  impact: Impact;
+  title: string;
+  summary: string;
+  troubleshootingSteps: string[];
+  suggestedAssigneeId?: string;
+  suggestedAssigneeName?: string;
+  confidenceScore: number;
+}

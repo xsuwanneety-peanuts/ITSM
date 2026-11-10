@@ -56,6 +56,9 @@ export const Header: React.FC<HeaderProps> = ({
       case 'reports': return 'รายงานสถิติ (Reports)';
       case 'operations': return 'ขออนุมัติการเปลี่ยนแปลง (Operations)';
       case 'knowledge_base': return 'ฐานความรู้ไอที (Knowledge Base)';
+      case 'monitoring': return 'การเฝ้าระวัง & API Health Check';
+      case 'ai_portal': return 'ศูนย์บริการอัจฉริยะ AI Portal';
+      case 'settings': return 'ตั้งค่าระบบ (Settings)';
       default: return view;
     }
   };

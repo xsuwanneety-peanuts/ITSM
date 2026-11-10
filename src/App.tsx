@@ -13,20 +13,38 @@ import { ChangeManagementView } from './components/ChangeManagementView.tsx';
 import { WorkforceView } from './components/WorkforceView.tsx';
 import { KnowledgeBaseView } from './components/KnowledgeBaseView.tsx';
 import { ReportsView } from './components/ReportsView.tsx';
+import { SettingsView } from './components/SettingsView.tsx';
+import { ApiMonitoringView } from './components/ApiMonitoringView.tsx';
+import { AiPortalView } from './components/AiPortalView.tsx';
 import {
   Ticket,
+  TicketStatus,
   Agent,
   FilterState,
+  RequestTypeDefinition,
+  SlaPolicy,
+  SystemConfig,
+  HealthCheckService,
+  MonitoringAlert,
 } from './types/itsm.ts';
 import {
   SEED_AGENTS,
   INITIAL_TICKETS,
+  REQUEST_TYPE_DEFINITIONS,
+  DEFAULT_SLA_POLICIES,
+  DEFAULT_SYSTEM_CONFIG,
+  DEFAULT_HEALTH_SERVICES,
+  INITIAL_MONITORING_ALERTS,
 } from './data/seedData.ts';
-
 
 export default function App() {
   const [tickets, setTickets] = useState<Ticket[]>(INITIAL_TICKETS);
   const [agents, setAgents] = useState<Agent[]>(SEED_AGENTS);
+  const [requestTypes, setRequestTypes] = useState<RequestTypeDefinition[]>(REQUEST_TYPE_DEFINITIONS);
+  const [slaPolicies, setSlaPolicies] = useState<SlaPolicy[]>(DEFAULT_SLA_POLICIES);
+  const [systemConfig, setSystemConfig] = useState<SystemConfig>(DEFAULT_SYSTEM_CONFIG);
+  const [healthServices] = useState<HealthCheckService[]>(DEFAULT_HEALTH_SERVICES);
+  const [monitoringAlerts] = useState<MonitoringAlert[]>(INITIAL_MONITORING_ALERTS);
   const [activeNav, setActiveNav] = useState<NavItem>('summary');
   const [portalMode, setPortalMode] = useState<'agent' | 'customer'>('agent');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -69,6 +87,19 @@ export default function App() {
       prev.map((t) => (t.id === updatedTicket.id ? updatedTicket : t))
     );
     setSelectedTicket(updatedTicket);
+  };
+
+  const handleUpdateTicketStatus = (ticketId: string, newStatus: TicketStatus) => {
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === ticketId
+          ? { ...t, status: newStatus, updatedAt: new Date().toISOString() }
+          : t
+      )
+    );
+    if (selectedTicket && selectedTicket.id === ticketId) {
+      setSelectedTicket((prev) => (prev ? { ...prev, status: newStatus } : null));
+    }
   };
 
   const handleCreateTicket = (newTicket: Ticket) => {
@@ -135,6 +166,8 @@ export default function App() {
                 setFilters={setFilters}
                 onTicketClick={(ticket) => setSelectedTicket(ticket)}
                 onNavigateToQueues={handleNavigateToQueuesWithPreset}
+                onUpdateTicketStatus={handleUpdateTicketStatus}
+                onOpenCreateTicketModal={() => setIsCreateModalOpen(true)}
               />
             )}
 
@@ -191,6 +224,72 @@ export default function App() {
 
             {activeNav === 'knowledge_base' && (
               <KnowledgeBaseView onOpenCreateTicket={() => setIsCreateModalOpen(true)} />
+            )}
+
+            {activeNav === 'monitoring' && (
+              <ApiMonitoringView
+                services={healthServices}
+                alerts={monitoringAlerts}
+                onOpenCreateTicketForIncident={(preset) => {
+                  const key = `SUP-${Math.floor(100 + Math.random() * 900)}`;
+                  const newTicket: Ticket = {
+                    id: `t-inc-${Date.now()}`,
+                    key,
+                    title: preset.title,
+                    description: preset.description,
+                    category: 'incident',
+                    requestType: preset.requestType,
+                    status: 'เปิดใหม่',
+                    priority: preset.priority,
+                    urgency: preset.priority.includes('P1') ? 'Critical' : 'High',
+                    impact: 'High',
+                    assignee: agents[1], // สมชาย (เครือข่าย)
+                    reporter: {
+                      name: 'ระบบเฝ้าระวังอัตโนมัติ (Health Monitoring)',
+                      email: 'monitoring@enterprise.co.th',
+                      avatar: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=100',
+                      department: 'ฝ่ายปฏิบัติการไอที',
+                    },
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    dueDate: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+                    slaRemainingMinutes: 120,
+                    slaTargetMinutes: 120,
+                    tags: preset.tags,
+                    comments: [],
+                  };
+                  handleCreateTicket(newTicket);
+                  setSelectedTicket(newTicket);
+                }}
+                onSelectTicketByKey={(key) => {
+                  const found = tickets.find((t) => t.key === key);
+                  if (found) setSelectedTicket(found);
+                }}
+              />
+            )}
+
+            {activeNav === 'ai_portal' && (
+              <AiPortalView
+                agents={agents}
+                onCreateTicketFromAi={(ticket) => {
+                  handleCreateTicket(ticket);
+                  setSelectedTicket(ticket);
+                }}
+                onNavigateToQueues={() => setActiveNav('queues')}
+              />
+            )}
+
+            {activeNav === 'settings' && (
+              <SettingsView
+                requestTypes={requestTypes}
+                setRequestTypes={setRequestTypes}
+                agents={agents}
+                setAgents={setAgents}
+                slaPolicies={slaPolicies}
+                setSlaPolicies={setSlaPolicies}
+                systemConfig={systemConfig}
+                setSystemConfig={setSystemConfig}
+              />
             )}
           </>
         )}

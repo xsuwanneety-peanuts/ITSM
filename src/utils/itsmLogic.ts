@@ -298,3 +298,63 @@ export function formatSlaCountdown(minutes: number): { label: string; isBreached
     isWarning,
   };
 }
+
+export function calculateHealthSummary(services: import('../types/itsm.ts').HealthCheckService[]) {
+  const total = services.length;
+  const operational = services.filter((s) => s.status === 'operational').length;
+  const degraded = services.filter((s) => s.status === 'degraded' || s.status === 'outage').length;
+  const avgLatency =
+    total > 0
+      ? Math.round(services.reduce((acc, s) => acc + s.latencyMs, 0) / total)
+      : 0;
+  const overallUptime =
+    total > 0
+      ? Number((services.reduce((acc, s) => acc + s.uptimePercentage, 0) / total).toFixed(2))
+      : 100;
+
+  return {
+    total,
+    operational,
+    degraded,
+    avgLatency,
+    overallUptime,
+    isAllHealthy: degraded === 0,
+  };
+}
+
+export function classifyIssueRuleBased(description: string, department: string = 'ทั่วไป') {
+  const lower = description.toLowerCase();
+  let category: 'incident' | 'service_request' | 'problem' | 'change' = 'service_request';
+  let requestType = 'ขอรับความช่วยเหลือด้านไอทีทั่วไป (Get IT help)';
+  let priority: 'P1 - วิกฤต' | 'P2 - สูง' | 'P3 - ปานกลาง' | 'P4 - ต่ำ' = 'P3 - ปานกลาง';
+  let confidence = 0.92;
+
+  if (lower.includes('vpn') || lower.includes('ssh') || lower.includes('ล่ม') || lower.includes('หลุดบ่อย')) {
+    category = 'incident';
+    requestType = 'แจ้งปัญหาระบบหรือบริการขัดข้อง (Report a system problem)';
+    priority = 'P2 - สูง';
+    confidence = 0.96;
+  } else if (lower.includes('สิทธิ์') || lower.includes('admin') || lower.includes('aws') || lower.includes('gcp')) {
+    category = 'service_request';
+    requestType = 'ขอสิทธิ์ผู้ดูแลระบบ (Request admin access)';
+    priority = 'P2 - สูง';
+    confidence = 0.95;
+  } else if (lower.includes('รหัสผ่าน') || lower.includes('2fa') || lower.includes('okta')) {
+    category = 'service_request';
+    requestType = 'แก้ไขปัญหาบัญชีผู้ใช้ / รหัสผ่าน (Fix an account problem)';
+    priority = 'P3 - ปานกลาง';
+    confidence = 0.94;
+  } else if (lower.includes('จอ') || lower.includes('ไมค์') || lower.includes('ห้องประชุม') || lower.includes('ชำรุด')) {
+    category = 'incident';
+    requestType = 'แจ้งอุปกรณ์ฮาร์ดแวร์ชำรุด (Report broken hardware)';
+    priority = 'P2 - สูง';
+    confidence = 0.93;
+  }
+
+  return {
+    category,
+    requestType,
+    priority,
+    confidence,
+  };
+}

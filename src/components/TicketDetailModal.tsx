@@ -358,7 +358,7 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
                         <img
-                          src={comment.avatar}
+                          src={comment.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}
                           alt={comment.author}
                           className="h-6 w-6 rounded-full object-cover border border-slate-200"
                         />

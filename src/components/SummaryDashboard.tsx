@@ -20,9 +20,11 @@ import {
   TrendingUp,
   BarChart2,
   ChevronDown,
+  LayoutGrid,
 } from 'lucide-react';
 import {
   Ticket,
+  TicketStatus,
   Agent,
   FilterState,
 } from '../types/itsm.ts';
@@ -35,6 +37,7 @@ import {
   calculateStatusBreakdown,
 } from '../utils/itsmLogic.ts';
 import { REQUEST_TYPE_DEFINITIONS } from '../data/seedData.ts';
+import { KanbanBoardView } from './KanbanBoardView.tsx';
 
 interface SummaryDashboardProps {
   tickets: Ticket[];
@@ -43,6 +46,8 @@ interface SummaryDashboardProps {
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   onTicketClick: (ticket: Ticket) => void;
   onNavigateToQueues: (filterPreset?: Partial<FilterState>) => void;
+  onUpdateTicketStatus?: (ticketId: string, newStatus: TicketStatus) => void;
+  onOpenCreateTicketModal?: (prefillStatus?: TicketStatus) => void;
 }
 
 export const SummaryDashboard: React.FC<SummaryDashboardProps> = ({
@@ -52,7 +57,10 @@ export const SummaryDashboard: React.FC<SummaryDashboardProps> = ({
   setFilters,
   onTicketClick,
   onNavigateToQueues,
+  onUpdateTicketStatus,
+  onOpenCreateTicketModal,
 }) => {
+  const [dashboardMode, setDashboardMode] = useState<'metrics' | 'kanban'>('metrics');
   const [showEmptySimulated, setShowEmptySimulated] = useState(false);
   const [isLocked, setIsLocked] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -139,21 +147,80 @@ export const SummaryDashboard: React.FC<SummaryDashboardProps> = ({
         </div>
       )}
 
-      {/* Tabs Row - Corporate Red Accent */}
-      <div className="mt-5 flex items-center border-b border-slate-200">
-        <div className="flex items-center gap-2 border-b-2 border-red-600 px-3 py-2 text-sm font-bold text-red-700">
-          <Globe className="h-4 w-4 text-red-600" />
-          <span>ภาพรวม</span>
+      {/* Tabs Row - Corporate Red Accent & Mode Switcher */}
+      <div className="mt-5 flex flex-wrap items-center justify-between border-b border-slate-200 gap-2">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setDashboardMode('metrics')}
+            className={`flex items-center gap-2 border-b-2 px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer ${
+              dashboardMode === 'metrics'
+                ? 'border-red-600 text-red-700 bg-red-50/40 rounded-t'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Globe className="h-3.5 w-3.5" />
+            <span>ภาพรวมตัวชี้วัด (Summary)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setDashboardMode('kanban')}
+            className={`flex items-center gap-2 border-b-2 px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer ${
+              dashboardMode === 'kanban'
+                ? 'border-red-600 text-red-700 bg-red-50/40 rounded-t'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            <span>กระดานคัมบัง (Kanban Board)</span>
+            <span className="rounded-full bg-red-100 px-1.5 py-0.2 text-[10px] font-bold text-red-700">
+              {tickets.length}
+            </span>
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => alert('สามารถเพิ่มแท็บแดชบอร์ดเฉพาะทางได้ เช่น แดชบอร์ดผู้บริหาร หรือ Incident Room')}
-          className="ml-1 rounded-md p-1.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors cursor-pointer"
-          title="เพิ่มแท็บใหม่"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
+
+        {/* View Switcher Segments */}
+        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-xs font-semibold mb-1">
+          <button
+            type="button"
+            onClick={() => setDashboardMode('metrics')}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+              dashboardMode === 'metrics'
+                ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <BarChart2 className="h-3.5 w-3.5" />
+            <span>สรุปสถิติ</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDashboardMode('kanban')}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+              dashboardMode === 'kanban'
+                ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            <span>คัมบังบอร์ด</span>
+          </button>
+        </div>
       </div>
+
+      {dashboardMode === 'kanban' ? (
+        <div className="mt-5">
+          <KanbanBoardView
+            tickets={filteredTickets}
+            agents={agents}
+            onTicketClick={onTicketClick}
+            onUpdateTicketStatus={onUpdateTicketStatus || (() => {})}
+            onCreateTicketInStatus={onOpenCreateTicketModal}
+          />
+        </div>
+      ) : (
+        <>
 
       {/* Filter Bar (Matching Image 1 in Corporate Red theme) */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -647,6 +714,17 @@ export const SummaryDashboard: React.FC<SummaryDashboardProps> = ({
                     </div>
                   );
                 })}
+
+                <div className="pt-2 text-center border-t border-slate-100 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setDashboardMode('kanban')}
+                    className="text-xs font-bold text-red-600 hover:underline cursor-pointer inline-flex items-center gap-1"
+                  >
+                    <span>เปิดดูกระดานคัมบัง (Kanban Board)</span>
+                    <span>&rarr;</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -740,6 +818,8 @@ export const SummaryDashboard: React.FC<SummaryDashboardProps> = ({
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };
