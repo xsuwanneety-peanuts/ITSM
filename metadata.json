@@ -1,0 +1,6 @@
+{
+  "name": "ITSM Pro - IT Service Management",
+  "description": "Enterprise IT Service Management platform with incident resolution, change approval workflows, service catalog fulfillment, and real-time ITIL operations dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
