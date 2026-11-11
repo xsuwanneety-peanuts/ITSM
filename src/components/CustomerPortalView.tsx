@@ -118,7 +118,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           ฝ่ายสนับสนุนและบริการไอทีองค์กร
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-          ศูนย์บริการและแคตตาล็อกคำขอไอที
+          IT Service Center
         </h1>
         <p className="mt-2 text-sm text-slate-500 max-w-xl mx-auto">
           ต้องการความช่วยเหลือด้านไอที ขอสิทธิ์ซอฟต์แวร์ อุปกรณ์ หรือแจ้งปัญหาระบบ เลือกรายการด้านล่างนี้ได้ทันที
