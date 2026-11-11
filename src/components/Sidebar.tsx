@@ -104,19 +104,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Navigation Scrollable Area */}
         <div className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5 text-[13px] font-medium text-slate-700">
-          {/* เริ่มต้นใช้งาน */}
-          <button
-            type="button"
-            onClick={() => handleNavSelect('summary')}
-            className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left transition-colors hover:bg-red-50/50 hover:text-red-700 ${
-              isCollapsed ? 'justify-center' : ''
-            }`}
-            title="เริ่มต้นใช้งาน (Get started)"
-          >
-            <Sparkles className="h-4 w-4 shrink-0 text-slate-400" />
-            {!isCollapsed && <span className="text-slate-600">เริ่มต้นใช้งาน</span>}
-          </button>
-
           {/* ภาพรวม (Summary) - Active State in Corporate Red */}
           <button
             type="button"
@@ -213,7 +200,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </button>
 
-          {/* กำลังพล (Workforce) */}
+          {/* สมาชิกทีม */}
           <button
             type="button"
             onClick={() => handleNavSelect('workforce')}
@@ -222,7 +209,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 ? 'bg-red-50 text-red-700 font-bold'
                 : 'text-slate-700 hover:bg-slate-100/80'
             } ${isCollapsed ? 'justify-center' : ''}`}
-            title="กำลังพล (Workforce)"
+            title="สมาชิกทีม"
           >
             {activeNav === 'workforce' && (
               <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-md bg-red-600" />
@@ -231,7 +218,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Users2
                 className={`h-4 w-4 shrink-0 ${activeNav === 'workforce' ? 'text-red-600' : 'text-slate-500'}`}
               />
-              {!isCollapsed && <span className="truncate">กำลังพล (Workforce)</span>}
+              {!isCollapsed && <span className="truncate">สมาชิกทีม</span>}
             </div>
             {!isCollapsed && (
               <span className="ml-1 rounded-sm bg-red-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-800">
@@ -300,7 +287,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {!isCollapsed && <span>ฐานความรู้ไอที</span>}
           </button>
 
-          {/* การเฝ้าระวัง & API Health Check */}
+          {/* Report Monitoring */}
           <button
             type="button"
             onClick={() => handleNavSelect('monitoring')}
@@ -309,7 +296,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 ? 'bg-red-50 text-red-700 font-bold'
                 : 'text-slate-700 hover:bg-slate-100/80'
             } ${isCollapsed ? 'justify-center' : ''}`}
-            title="เฝ้าระวัง & ตรวจสอบ API (Noti Monitoring & API Health Check)"
+            title="Report Monitoring"
           >
             {activeNav === 'monitoring' && (
               <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-md bg-red-600" />
@@ -318,7 +305,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Activity
                 className={`h-4 w-4 shrink-0 ${activeNav === 'monitoring' ? 'text-red-600' : 'text-slate-500'}`}
               />
-              {!isCollapsed && <span className="truncate">เฝ้าระวัง & API Health</span>}
+              {!isCollapsed && <span className="truncate">Report Monitoring</span>}
             </div>
             {!isCollapsed && (
               <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-800">
